@@ -15,7 +15,7 @@ S=zeros(n-1,1);
 UF=zeros(n,1);
 for k=1:n-1
     S(k)=sum(sum(a(1:(k+1),:)));%S是n-1个，从第二个求和到第n个
-    E=(k+1)*k/4;%均值，注意这里k本应从2到n，但为序号方便，这里k=1:n-1，所以加1
+    E=(k+2)*(k+1)/4;%均值，注意这里k本应从2到n，但为序号方便，这里k=1:n-1，所以加1
     V=k*(k+1)*(2*(k+1)+5)/72;%方差
     UF(k+1)=(S(k)-E)/(V^0.5);%从2开始，默认UF1=0，UF(K+1)与S(k)对应，k=1，UF2,S(1)-S2   删%abs
 end
@@ -23,7 +23,7 @@ end
 %--------------------------------------------------
 %计算UFK,UBK
 UF=UFK(x);
-UB=-flipud(UFK(flipud(x)));%x翻转（得到逆序的UF-逆序时间轴）+UB翻转（保持时间轴一致）
+UB=-flipud(UFK(flipud(x')'));%x翻转（得到逆序的UF-逆序时间轴）+UB翻转（保持时间轴一致）
 %以0.5为置信水平，临界值为+-1.96
 h1=zeros(n,1);
 h2=zeros(n,1);
@@ -35,6 +35,7 @@ h3(:)=0;
 figure
 hold on 
 date1=datenum(date);
+% date1=date;
 plot(date1,UF,'r');%UF序列
 plot(date1,UB,'b');%UB序列
 plot(date1,h1,'-.');%上临界

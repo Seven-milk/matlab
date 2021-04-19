@@ -65,7 +65,7 @@ x=cell(0,0);%用以存储分段数据
 x(1)={X};
 [T,Tmax,p,PTmax]=partition(x{1});
     if PTmax>=P0 
-    FLAG(find(X==x{1}(p)))=1;
+    FLAG(find(X==x{1}(p(1))))=1;
     AllT=[AllT;T];
     AllTmax=[AllTmax;Tmax];
     AllPTmax=[AllPTmax;PTmax];
@@ -93,7 +93,7 @@ for i3=1:length(x(i1+1,:))
     [T,Tmax,p,PTmax]=partition(x{i1+1,i3});
     AllT=[AllT;T];
         if PTmax>=P0
-    FLAG(find(X==x{i1+1,i3}(p)))=1;
+    FLAG(find(X==x{i1+1,i3}(p(1))))=1;
     AllTmax=[AllTmax;Tmax];
     AllPTmax=[AllPTmax;PTmax];
         end
@@ -112,22 +112,22 @@ FLAG(end)=[];
 FLAG=date(find(FLAG~=0));
 FLAG1=datenum(FLAG);
 %% 绘图
-% figure
-% hold on
-% date1=datenum(date);
-% plot(date1,X);
-% % b=(min(X):0.1:max(X));
-% % b=(-10:0.1:10);
-% % a=zeros(length(b));
-% for i4=1:length(FLAG1)
-%     a=FLAG1(i4);
-% plot([a a],get(gca,'YLim'),'r-');
-% end
-% axis([min(date1),max(date1),min(X),max(X)]);
-% datetick('x','yyyy','keeplimits');%返回日期（年，月）显示
-% xlabel('年份');
-% ylabel('序列值');
-% title('启发式分割法变异诊断');
+figure
+hold on
+date1=datenum(date);
+plot(date1,X);
+% b=(min(X):0.1:max(X));
+% b=(-10:0.1:10);
+% a=zeros(length(b));
+for i4=1:length(FLAG1)
+    a=FLAG1(i4);
+plot([a a],get(gca,'YLim'),'r-');
+end
+axis([min(date1),max(date1),min(X),max(X)]);
+datetick('x','yyyy','keeplimits');%返回日期（年，月）显示
+xlabel('年份');
+ylabel('序列值');
+title('启发式分割法变异诊断');
 %% 绘图准备,x_avg分段
 x_avg=zeros(length(X),length(x(end,:))*2);
 i6=1;%控制列

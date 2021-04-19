@@ -1,22 +1,28 @@
-function [FLAGS]=BGSA(x,y,P0,L0)
-%抄的程序
+function [ FLAGS ] = BGSA( x,y,P0,L0 )
 % [ FLAGS ] = BGSA( x,y,P0,L0 )
-%  x: 序列的x坐标（仅用于绘图，如果不使用则设置为[]）
-%  y: 降雨量序列
-%  P0: 显著性水平门限值，低于此值的不再分割
-%  L0: 最小分割尺度，子段长度小于此值的不再分割
-%  FLAGS: 返回的逻辑向量与y大小相同，值为1表示相应的位置定位分割点
-% 通过Bernaola-Galvan分割算法（BGSA）找出并绘制突变点及其最大密度间隔。
-%   如何解释这个数字？
-%   蓝色细曲线是原始序列; 而粗一个表示每个段中原始序列的间隔平均值t; 红色垂直线表示分割点所在的位置;阴影指示最大突变密度间隔。\
-n=length(y);
-if isempty(x)
-    x=1:n;
-end
-FLAGS=zeros(1,n);
-FLAGS(n)=1;
+%  x: the x-coordinate of sequence(just for plot, set as [] if not use)
+%  y: the sequence
+%  P0: a critical value to determine whether the segmentation point is 
+%      significant 
+%  L0: the minimum segmentation scale
+%  FLAGS: a logic vector returned with the same size as y, and value of 1
+%         denotes the corresponding position locates a segmentation point
+% Find out and plot the mutation points and its maximum density interval by
+%   Bernaola-Galvan Segmentation Algorithm(BGSA).
+%   How to interpret the figure?
+%   The blue thin curve is primitive sequence; and the thick one denotes 
+%   the interval mean of primitive sequence in each segment; the red 
+%   vertical lines indicate where the segmentation points locate; shadows
+%   indicate the maximum mutation density intervals. 
 
-% 通过标记1在FLAGS中找到分割点的位置。
+n = length(y);
+if isempty(x)
+    x = 1:n;
+end
+FLAGS = zeros(1,n);
+FLAGS(n) = 1;
+
+% Locate the position of segmentation points by mark 1 in FLAGS. 
 num_sp = sum(FLAGS);
 while 1
     I = find(FLAGS==1);
@@ -30,10 +36,10 @@ while 1
             suby = y(I(k-1)+1:I(k));
         end
         if length(subx)>L0
-            [Xpos,PTmax]=calc_TP(subx,suby);
+            [ Xpos,PTmax ] = calc_TP( subx,suby );
             if PTmax>=P0
-                FLAGS(x==min(Xpos))=1;
-                num_sp=num_sp+1;
+                FLAGS(x==min(Xpos)) = 1;
+                num_sp = num_sp+1;
             end
         end
     end
@@ -42,7 +48,7 @@ while 1
     end
 end
 
-% 计算每个分割的平均序列。
+% Calculate the mean sequence of each segmentation.
 for k = 1:num_sp
     if k==1
         my(1:I(k)) = mean(y(1:I(k)));
@@ -51,18 +57,18 @@ for k = 1:num_sp
     end
 end
 
-% 调整一些不合理的突变点。
+% Adjust some unreasonable mutation points.
 FLAGS(n) = 0;
 for j = 2:n
-    if FLAGS(j)==1 && FLAGS(j-1)==1%连续突变点
+    if FLAGS(j)==1 && FLAGS(j-1)==1
         FLAGS(j) = 0;
     end
 end
 
-return
+%return
 figure
 
-% 计算并找出最大突变密度的间隔。
+% Calculate and find out the interval of the max mutation density.
 NDT = L0;
 for j = 1:n-NDT
     n = sum(FLAGS(j:j+NDT));
@@ -70,7 +76,7 @@ for j = 1:n-NDT
 end
 Ieta = find((eta==max(eta))+(eta~=0)==2);
 
-% 影响间隔
+% Shadow the intervals
 ya = [(max(y)+1)*1.1 (max(y)+1)*1.1];
 bv = (min(y)-1)*1.1;
 xamin = x(Ieta);
@@ -92,7 +98,7 @@ for l = 1:kk
 end
 end
 
-% 在分割点绘制曲线和垂直线。
+% Plot the curves and vertical lines at segmentation points.
 plot(x,y,'color',[0 .447 .741]);
 hold on
 plot(x,my,'color',[0 .447 .741],'linewidth',2);
@@ -106,8 +112,11 @@ axis([min(x) max(x) (min(y)-1)*1.05 (max(y)+1)*1.05]);
 title('Bernaola-Galvan Segmentation Algorithm')
 end
 
-function [Xpos,PTmax] = calc_TP(X,Y)
-% 子函数计算统计量T，并找出与X系列对应的位置（Xpos）的Tmax，然后计算显着性检验的统计PTmax。
+function [ Xpos,PTmax ] = calc_TP( X,Y )
+% Subfunction to calculate the statistic T and find out the Tmax with its
+%   position(Xpos) corresponding to X-series, and then calculate statistic 
+%   PTmax for significance test. 
+
 N = length(Y);
 T = zeros(1,N);
 for i=2:N-1
@@ -127,3 +136,4 @@ delta = .4;
 v = N-2;
 PTmax = (1-betainc(v/(v+Tmax^2),delta*v,delta))^gamma;
 end
+
