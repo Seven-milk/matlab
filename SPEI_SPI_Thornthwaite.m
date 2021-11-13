@@ -1,7 +1,7 @@
 %%
 % Programmed by Taesam Lee,  Dec.03,2009
 % INRS-ETE, Quebec, Canada
-function [Z]=SPEI_SPI(Data,scale,nseas)
+function [Z]=SPEI_SPI(pre,tem,year,start_year,scale,nseas)
 %Standardized Precipitation Index 
 % Input Data
 % Data : Monthly Data vector not matrix (monthly or seasonal precipitation)
@@ -14,6 +14,47 @@ function [Z]=SPEI_SPI(Data,scale,nseas)
 
 %if row vector then make coloumn vector
 %if (sz==1) Data(:,1)=Data;end
+%% 计算PT
+Heatindex=[];
+a=[];
+PT=[];
+p=[];
+Ta=tem;
+
+for year_=year(1):year(end)
+    
+        l=(year_-start_year)*12+1;
+        m=l+11;
+
+        for i= l:m
+                if Ta(i)<=0
+                    p=[p,0];    
+                elseif 0<Ta(i)
+                     p=[p,(Ta(i)/5)^1.514]; 
+%    else
+%        p=[p,-415.85+32.24*T-0.43*T^2]; 
+                end
+        end
+sp= sum(p);
+Heatindex=[Heatindex;sp];
+a1=(6.75*10.^-7)*(sp)^3-(7.71*10.^-5)*(sp)^2+(1.79*10.^-2)*(sp)+0.49;
+a=[a;a1];
+for i=l:m
+    if Ta(i)<=0
+         PT=[PT,0];    
+    elseif 0<Ta(i)&&Ta(i)<=26.5
+        PT=[PT,16*(Ta(i)*10/sp)^a1];
+    else
+        PT=[PT,-415.85+32.24*T-0.43*T^2];  
+    end
+
+end
+p=[];
+end
+
+%%
+Data = pre - PT';
+
 erase_yr=ceil(scale/12);  %1-12的尺度均为1，13-24的时间尺度为2，目的在于后面的空设置，即1-12存在第一年为空值，13-24存在前二年为空值
 
 % Data setting to scaled dataset
@@ -65,6 +106,6 @@ for is=1:nseas  %12个月的循环，nseas=12
     max(cdf)
     Z(tind)=norminv(cdf);
 end
-
+Z = Z';
 %Gamma parameter estimation and tranform
 
