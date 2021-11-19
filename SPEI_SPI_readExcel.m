@@ -1,7 +1,7 @@
 %%
 % Programmed by Taesam Lee,  Dec.03,2009
 % INRS-ETE, Quebec, Canada
-function [Z]=SPEI_SPI(Data,scale,nseas)
+function [Z]=SPEI_SPI(Path,scale,nseas)
 %Standardized Precipitation Index 
 % Input Data
 % Data : Monthly Data vector not matrix (monthly or seasonal precipitation)
@@ -14,6 +14,7 @@ function [Z]=SPEI_SPI(Data,scale,nseas)
 
 %if row vector then make coloumn vector
 %if (sz==1) Data(:,1)=Data;end
+Data = xlsread(Path)
 erase_yr=ceil(scale/12);  %1-12的尺度均为1，13-24的时间尺度为2，目的在于后面的空设置，即1-12存在第一年为空值，13-24存在前二年为空值
 
 % Data setting to scaled dataset
@@ -61,16 +62,8 @@ for is=1:nseas  %12个月的循环，nseas=12
     for i = 1:N
         cdf(i) = log_cdf(Xn(i));
     end
-    
-    %note:!!! real or complex, modify b
-    if ~(isreal(cdf))
-        log_cdf = @(x) 1/(1+(a/(x-y))^floor(b));
-        cdf = [];
-        for i = 1:N
-            cdf(i) = log_cdf(Xn(i));
-        end
-    end
-    
+    min(cdf)
+    max(cdf)
     Z(tind)=norminv(cdf);
 end
 
