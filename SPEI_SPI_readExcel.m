@@ -62,8 +62,16 @@ for is=1:nseas  %12个月的循环，nseas=12
     for i = 1:N
         cdf(i) = log_cdf(Xn(i));
     end
-    min(cdf)
-    max(cdf)
+    
+    %note:!!! real or complex, modify b
+    if ~(isreal(cdf))
+        log_cdf = @(x) 1/(1+(a/(x-y))^floor(b));
+        cdf = [];
+        for i = 1:N
+            cdf(i) = log_cdf(Xn(i));
+        end
+    end
+
     Z(tind)=norminv(cdf);
 end
 
